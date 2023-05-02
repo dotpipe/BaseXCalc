@@ -83,7 +83,12 @@ bool air::airAlgo (long long int Ti) {
 
 		for (int o = 0 ; o < results.size() ; o++)
 			n = n/range_size;
-		results.push_back(abs(n%range_size));
+		if (n == 0)
+		{
+			results.push_back(0);
+			continue;
+		}
+		results.push_back((n%(range_size)));
 	}
 	return 1;
 }
@@ -93,7 +98,7 @@ int main(int argc, char ** argv) {
 
 	if (argc < 3) {
 		printf("Usage: \n\t%s -a <integers...>", argv[0]);
-		printf("\n\t%s -c <minimum> <no of vars> <long long int>", argv[0]);
+		printf("\n\t%s -c <maximum> <no of vars> <long long int>", argv[0]);
 		return 0;
 	}
 	if (strcmp(argv[1],"-a") == 0) {
@@ -102,23 +107,23 @@ int main(int argc, char ** argv) {
 		x->MAX_ALL = x->answers.size();
 		for (unsigned int i : x->answers)
 		{
-			x->max_size = (x->max_size < i) ? (i) + 1 : x->max_size;
+			x->max_size = (x->max_size < i) ? (i + 1) : x->max_size;
 			x->min_size = (x->min_size > i) ? (i - 1) : x->min_size;
 		}
-		for (unsigned int i : x->answers)
-		{
-			unsigned int f = x->max_size - i - x->min_size;
-			x->mid.push_back(f);
-			if (f > x->range_size)
-				x->range_size = f;
-		}
-		x->answers = x->mid;
-		// x->range_size = x->max_size - abs(x->min_size);
+		// for (unsigned int i : x->answers)
+		// {
+		// 	unsigned int f = x->max_size - i;
+		// 	x->mid.push_back(f);
+		// 	if (f > x->range_size)
+		// 		x->range_size = f;
+		// }
+		// x->answers = x->mid;
+		x->range_size = x->max_size - abs(x->min_size);
+		cout << "Range Size:\t" << x->range_size << "Max:\t" << x->max_size << "Min:\t" << x->min_size << endl << flush;
 		x->idleMethod();
 	}
 	if (strcmp(argv[1],"-c") == 0) {
-		if (argc == 6)
-			x->range_size = x->max_size + abs(x->min_size);
+		x->range_size = stoi(argv[2]) - stoi(argv[3]);
 		x->MAX_ALL = stoi(argv[4]);
 		x->MAX_Q = x->MAX_ALL;
 		long long int t = stoll(argv[5]);
@@ -127,8 +132,8 @@ int main(int argc, char ** argv) {
 		x->results.clear();
 		x->idleMethod();
 		printf("Series: ");
-		for (long long int x : x->results)
-			printf("%d ", x);
+		for (long long int y : x->results)
+			printf("%d ", x->range_size-y);
 		if (x->answers == x->results)
 			printf("\nLargess verified. Input and output are same");
 		else
