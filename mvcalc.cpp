@@ -12,7 +12,7 @@ class air {
 
 	public:
 	int range_size = 3;
-	int min_size = 0;
+	int min_size = 256;
 	int max_size = 2;
 	int MAX_ALL = 0;
 	int MAX_Q = MAX_ALL;
@@ -73,19 +73,23 @@ bool air::airAlgo (long long int Ti) {
 		for (int x : results) {
 			long long powr = 1;
 			for (int u = 0 ; u < j ; u++)
-				powr *= range_size;
+				powr *= (range_size);
 			m = m + (powr * x);
 			j++;
 		}
 		n = Ti;
+		if (n - m < range_size) {
+			results.push_back(n-m);
+			continue;
+		}
 		n -= m;
 		m = 0;
 
 		for (int o = 0 ; o < results.size() ; o++)
 			n = n/range_size;
-		if (n == 0)
+		if (n%range_size == 0 && n > 0)
 		{
-			results.push_back(0);
+			results.push_back(n%(range_size + 1));
 			continue;
 		}
 		results.push_back((n%(range_size)));
@@ -108,7 +112,7 @@ int main(int argc, char ** argv) {
 		for (unsigned int i : x->answers)
 		{
 			x->max_size = (x->max_size < i) ? (i + 1) : x->max_size;
-			x->min_size = (x->min_size > i) ? (i - 1) : x->min_size;
+			x->min_size = (x->min_size > i) ? (i) : x->min_size;
 		}
 		// for (unsigned int i : x->answers)
 		// {
@@ -118,12 +122,14 @@ int main(int argc, char ** argv) {
 		// 		x->range_size = f;
 		// }
 		// x->answers = x->mid;
-		x->range_size = x->max_size - abs(x->min_size);
+		x->range_size = x->max_size; // - abs(x->min_size);
 		cout << "Range Size:\t" << x->range_size << "Max:\t" << x->max_size << "Min:\t" << x->min_size << endl << flush;
 		x->idleMethod();
 	}
 	if (strcmp(argv[1],"-c") == 0) {
-		x->range_size = stoi(argv[2]) - stoi(argv[3]);
+		x->max_size = stoi(argv[2]);
+		x->min_size = stoi(argv[3]);
+		x->range_size = (x->max_size);
 		x->MAX_ALL = stoi(argv[4]);
 		x->MAX_Q = x->MAX_ALL;
 		long long int t = stoll(argv[5]);
@@ -133,7 +139,7 @@ int main(int argc, char ** argv) {
 		x->idleMethod();
 		printf("Series: ");
 		for (long long int y : x->results)
-			printf("%d ", x->range_size-y);
+			printf("%d ", y);
 		if (x->answers == x->results)
 			printf("\nLargess verified. Input and output are same");
 		else
