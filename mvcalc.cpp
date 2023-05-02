@@ -11,12 +11,12 @@ using namespace std;
 class air {
 
 	public:
-	int range_size = 256;
+	int range_size = 3;
 	int min_size = 0;
-	int max_size = 256;
+	int max_size = 2;
 	int MAX_ALL = 0;
 	int MAX_Q = MAX_ALL;
-	vector<long int> answers, results;
+	vector<long int> answers, results, mid;
 	long long int total = 0;
 	size_t y = 0;
 	ifstream in_file;
@@ -83,7 +83,7 @@ bool air::airAlgo (long long int Ti) {
 
 		for (int o = 0 ; o < results.size() ; o++)
 			n = n/range_size;
-		results.push_back(n%range_size);
+		results.push_back(abs(n%range_size));
 	}
 	return 1;
 }
@@ -91,19 +91,29 @@ bool air::airAlgo (long long int Ti) {
 int main(int argc, char ** argv) {
 	air * x = new air();
 
-	if (argc < 5) {
-		printf("Usage: \n\t%s -a <maximum> <minimum> <integers...>", argv[0]);
-		printf("\n\t%s -c <maximum> <minimum> <no of vars> <long long int>", argv[0]);
+	if (argc < 3) {
+		printf("Usage: \n\t%s -a <integers...>", argv[0]);
+		printf("\n\t%s -c <minimum> <no of vars> <long long int>", argv[0]);
 		return 0;
 	}
-	x->max_size = stoi(argv[2]);
-	x->min_size = stoi(argv[3]);
-
 	if (strcmp(argv[1],"-a") == 0) {
-		for (int i = 4; i < argc; i++)
+		for (int i = 2; i < argc; i++)
 			x->answers.push_back(stoi(argv[i]));
 		x->MAX_ALL = x->answers.size();
-		x->range_size = x->max_size + abs(x->min_size);
+		for (unsigned int i : x->answers)
+		{
+			x->max_size = (x->max_size < i) ? (i) + 1 : x->max_size;
+			x->min_size = (x->min_size > i) ? (i - 1) : x->min_size;
+		}
+		for (unsigned int i : x->answers)
+		{
+			unsigned int f = x->max_size - i - x->min_size;
+			x->mid.push_back(f);
+			if (f > x->range_size)
+				x->range_size = f;
+		}
+		x->answers = x->mid;
+		// x->range_size = x->max_size - abs(x->min_size);
 		x->idleMethod();
 	}
 	if (strcmp(argv[1],"-c") == 0) {
