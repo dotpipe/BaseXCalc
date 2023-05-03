@@ -18,13 +18,13 @@ class air {
 	int MAX_ALL = 0;
 	int MAX_Q = MAX_ALL;
 	vector<unsigned long int> answers, results;
-  unsigned long long int total = 0;
+	unsigned long long int total = 0;
 	size_t y = 0;
 	ifstream in_file;
 	ofstream out_file;
 	bool idleMethod();
 	bool airAlgo(unsigned long long int);
-  void returnBytes(uint64_t str);
+	void returnBytes();
 	inline unsigned long long int recIdle() {
 		// unsigned long long int total = 0;
 		unsigned long long int powr = 1;
@@ -34,19 +34,22 @@ class air {
 				powr *= range_size;
 			}
 			// cout << total << " + (" << powr << "*" << answers[i] << ")\n" << flush;
-      total = total + (powr * answers[i]);
-			if (total > pow(2,48))
+    		total = total + (powr * answers[i]);
+			if (total > pow(2,54))
 			{
 				while (i > 0 && answers.size() > 0)
 				{
 					answers.erase(answers.begin());
 					i--;
 				}
-				return total;
+				returnBytes();
+				return 0;
+				// total = recIdle();
 			}
 		}
+		returnBytes();
 		// cout << "Largess: " << total << endl;
-		return total;
+		return 0;
 	}
 	air() {};
 	~air() {};
@@ -71,7 +74,7 @@ bool air::idleMethod() {
 		}
 		r++;
 	}
-  returnBytes(p);
+  returnBytes();
 	return 1;
 }
 
@@ -99,10 +102,10 @@ bool air::airAlgo (unsigned long long int Ti) {
 	return 1;
 }
 
-void air::returnBytes(uint64_t p)
+void air::returnBytes()
 {
   // cout << total << flush;
-  p = total;
+	uint64_t p = total;
 	string p_Str = "";
 	while (p > 0)
 	{
@@ -127,25 +130,26 @@ int main(int argc, char ** argv) {
 		// for (int i = 2; i < argc; i++)
 		// 	x->answers.push_back(stoi(argv[i]));
 		// x->MAX_ALL = x->answers.size();
-		uint8_t bytes = 24;
+		uint8_t bytes = 64;
 		x->in_file.open("test.in", std::ios_base::in);
 		x->out_file.open("test.out", std::ios_base::out | std::ios::trunc);
 		stringstream k;
 		k << x->in_file.rdbuf();
 		string inf = k.str();
-	  k.str("");
+	  	k.str("");
 		x->range_size = x->max_size;
 		for (uint32_t n = 0; n < inf.length(); n++)
 		{
-      while (++n%bytes && inf.length() > n+1)
-      {
-        x->answers.push_back(inf.at(n-1));
-        if ((unsigned int)(inf.at(n - 1)) > x->max_size)
-          x->max_size = (int)(inf.at(n-1));
-      }
+			while (n%bytes && inf.length() > n+1)
+			{
+				n++;
+				x->answers.push_back(inf.at(n-1));
+				if ((unsigned int)(inf.at(n - 1)) > x->max_size)
+					x->max_size = (int)(inf.at(n-1));
+			}
 			x->total = x->recIdle();
-      x->returnBytes(0);
-    }
+			x->returnBytes();
+		}
 	}
 	if (strcmp(argv[1],"-c") == 0) {
 		if (argc == 6)
