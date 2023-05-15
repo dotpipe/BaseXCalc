@@ -28,24 +28,14 @@ class air {
 	inline unsigned long long int recIdle() {
 		// unsigned long long int total = 0;
 		unsigned long long int powr = 1;
-		for (int i = 0 ; i < answers.size() ; i++) {
+		for (int i = 0 ; 0 < answers.size() ; i++) {
 			powr = 1;
 			for (int u = 0 ; u < i ; u++) {
 				powr *= range_size;
 			}
 			// cout << total << " + (" << powr << "*" << answers[i] << ")\n" << flush;
-    		total = total + (powr * answers[i]);
-			if (total > pow(2,54))
-			{
-				while (i > 0 && answers.size() > 0)
-				{
-					answers.erase(answers.begin());
-					i--;
-				}
-				returnBytes();
-				return 0;
-				// total = recIdle();
-			}
+    		total = total + (powr * (256-answers[i]));
+			answers.erase(answers.begin());
 		}
 		returnBytes();
 		// cout << "Largess: " << total << endl;
@@ -130,7 +120,7 @@ int main(int argc, char ** argv) {
 		// for (int i = 2; i < argc; i++)
 		// 	x->answers.push_back(stoi(argv[i]));
 		// x->MAX_ALL = x->answers.size();
-		uint8_t bytes = 64;
+		uint8_t bytes = 7;
 		x->in_file.open("test.in", std::ios_base::in);
 		x->out_file.open("test.out", std::ios_base::out | std::ios::trunc);
 		stringstream k;
@@ -138,14 +128,13 @@ int main(int argc, char ** argv) {
 		string inf = k.str();
 	  	k.str("");
 		x->range_size = x->max_size;
-		for (uint32_t n = 0; n < inf.length(); n++)
+		for (uint32_t n = 1; n < inf.length(); n++)
 		{
+			x->total = 0;
 			while (n%bytes && inf.length() > n+1)
 			{
-				n++;
 				x->answers.push_back(inf.at(n-1));
-				if ((unsigned int)(inf.at(n - 1)) > x->max_size)
-					x->max_size = (int)(inf.at(n-1));
+				n++;
 			}
 			x->total = x->recIdle();
 			x->returnBytes();
