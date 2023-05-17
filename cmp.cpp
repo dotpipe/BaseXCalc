@@ -1,4 +1,3 @@
-#include <cstdio>
 #include <fstream>
 #include <iostream>
 #include <vector>
@@ -15,13 +14,13 @@ class air
 {
 
 	public:
-	unsigned int range_size = 256;
-	int min_size = 256;
-	int max_size = 2;
+	unsigned long int range_size = 256;
+	uint64_t min_size = 256;
+	uint64_t max_size = 2;
 	int MAX_ALL = 0;
 	int MAX_Q = MAX_ALL;
 	uint64_t output_total = 0;
-	vector<unsigned long int> answers, results;
+	vector<unsigned long long int> answers, results;
 	unsigned long long int total = 0;
 	string all_output = "";
 	size_t y = 0;
@@ -34,16 +33,17 @@ class air
 	string bitsToBytes (string str_xweight, uint64_t& return_len);
 	string retrieve(string xweight, uint64_t return_len);
 	bool recollect(ifstream& in);
-	inline unsigned long long int recIdle() {
+	inline void recIdle() {
 		unsigned long long int powr = 1;
-		for (int i = 0 ; 0 < answers.size() ; i) {
+		for (int i = 0 ; 0 < answers.size() ; i++) {
 			powr = 1;
 			for (int u = 0 ; u < i ; u++) {
 				powr *= range_size;
 			}
-    		total = total + (powr * ((uint8_t)(answers.front() - min_size)%range_size));
+			// cout << " " << range_size << flush;
+    		total = total + (powr * ((uint8_t)(answers.front())%(range_size + 1)));
 			answers.erase(answers.begin());
-			if (i > 16 || answers.empty() || total > pow(2,54))
+			if (answers.empty() || total > pow(2,53))
 			{
 				i = 0;
 				returnBytes();
@@ -53,7 +53,7 @@ class air
 		if (total > 0)
 			returnBytes();
 // std::cout << "Largess: " << total << endl;
-		return 0;
+		return;
 	}
 	air() {};
 	~air() {};
@@ -166,8 +166,8 @@ bool air::recollect(ifstream& in)
 }
 
 bool air::idleMethod() {
-	unsigned long long int p = recIdle();
-	airAlgo(p);
+	recIdle();
+	airAlgo(total);
 	int r = 0;
 	for (unsigned int x : results) {
 		if (x == answers[r]) { }
@@ -215,16 +215,12 @@ bool air::airAlgo (unsigned long long int Ti) {
 void air::returnBytes()
 {
 	uint64_t p = total;
-	string p_Str = "";
 	while (p > 0)
 	{
-		if (p%128 == 0) all_output += (uint8_t)(0);
-		else all_output += (uint8_t)(p%128);
-		p >>= 7;
+		if (p%256 == 0) all_output += (uint8_t)(0);
+		else all_output += (uint8_t)(p%256);
+		p >>= 8;
 	}
-	all_output += (uint8_t)(max_size);
-	if (min_size == 0) all_output += (uint8_t)(255);
-	else all_output += (uint8_t)(min_size);
 	all_output += "?$";
 	if (all_output.length() > 100000)
 	{
@@ -237,35 +233,40 @@ void air::returnBytes()
 
 void air::collect(ifstream& in_file, string filename)
 {
-	uint8_t bytes = 128;
+	uint32_t bytes = 4;
 	stringstream no;
 	no << in_file.rdbuf();
 	string inf = no.str();
 	no.str("");
 	out_file << "-----------------S" << inf.length() << "START---TEST" << filename << "-----------------S";
 	// x->range_size = x->max_size;
-	for (uint32_t n = 1; n <= inf.length(); n++)
+	for (uint32_t n = 0; n < inf.length(); n++)
 	{
 		max_size = 2;
-		min_size = 256;
-		while (n%bytes && inf.length() > n)
+		min_size = 0xA;
+		for (uint64_t i = 0 ; i < 1255 && inf.length() > n ; n++, i++)
 		{
-			if ((int)inf.at(n-1) >= max_size)
-				max_size = inf.at(n-1) + 1;
-			if ((int)inf.at(n-1) < min_size)
-				min_size = inf.at(n-1);
-			answers.push_back(inf.at(n-1));
-			n++;
+			uint64_t y = 0;
+			while (n%bytes < bytes - 1 && inf.length() > n)
+			{
+				y <<= 8;
+				y += inf.at(n);
+				n++;
+			}
+			if (y >= max_size)
+				max_size = y;
+			answers.push_back(y - min_size);
 		}
-		range_size = max_size - min_size;
-		total = recIdle();
+		range_size = max_size%min_size;
+
+		recIdle();
 		total = 0;
-		std::cout << "\rOutput Total: " << output_total << "/" << (inf.length() - n) << flush;
+		// std::cout << "\rOutput Total: " << output_total << "/" << (inf.length() - n) << flush;
 	}
 	if (all_output.length() > 0)
 	{
 		out_file.write(all_output.c_str(), all_output.length());
-		std::cout << "\rOutput Total: " << output_total << "/" << 0 << flush;
+		std::cout << "\rOutput Total: " << (output_total + all_output.length()) << "/" << 0 << flush;
 	}
 }
 
@@ -322,7 +323,7 @@ int main(int argc, char ** argv) {
 	}
 	if (strcmp(argv[1],"-c") == 0) {
 		if (argc == 6)
-			x->range_size = x->max_size + abs(x->min_size);
+			x->range_size = x->max_size + (x->min_size);
 		x->MAX_ALL = stoi(argv[4]);
 		x->MAX_Q = x->MAX_ALL;
 		unsigned long long int t = stoll(argv[5]);
