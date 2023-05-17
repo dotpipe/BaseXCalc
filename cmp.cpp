@@ -1,3 +1,4 @@
+//
 #include <fstream>
 #include <iostream>
 #include <vector>
@@ -37,13 +38,13 @@ class air
 		unsigned long long int powr = 1;
 		for (int i = 0 ; 0 < answers.size() ; i++) {
 			powr = 1;
-			for (int u = 0 ; u < i ; u++) {
-				powr *= range_size;
-			}
+			// for (int u = 0 ; u < i ; u++) {
+			// 	powr *= range_size;
+			// }
 			// cout << " " << range_size << flush;
-    		total = total + (powr * ((uint8_t)(answers.front() - min_size)));
+    		total = total + (powr * ((uint8_t)(answers.front())));
 			answers.erase(answers.begin());
-			if (answers.empty() || total > pow(2,53))
+			//if (answers.empty() || total > pow(2,53))
 			{
 				i = 0;
 				returnBytes();
@@ -215,14 +216,17 @@ bool air::airAlgo (unsigned long long int Ti) {
 void air::returnBytes()
 {
 	uint64_t p = total;
-	while (p > 0)
+	uint8_t p9 = 0;
+	while (p > 0 || p9 < 1)
 	{
-		if (p%256 == 0) all_output += (uint8_t)(0);
+		if (p9 == 0 && p == 0) all_output += (uint8_t)(1);
+		else if (p%256 == 0) all_output += (uint8_t)(0);
 		else all_output += (uint8_t)(p%256);
 		p >>= 8;
+		p9++;
 	}
-	all_output += "?$";
-	if (all_output.length() > 100000)
+	all_output += "?";
+	if (all_output.length() > 10000)
 	{
 		output_total += all_output.length() + 2;
 		all_output += "8;";
@@ -242,7 +246,7 @@ void air::collect(ifstream& in_file, string filename)
 	// x->range_size = x->max_size;
 	for (uint32_t n = 0; n < inf.length(); n++)
 	{
-		min_size = 0xDDDDDDDDDDDDDDDE;
+		min_size = 0xDDDDDDDDDDDDDDD;
 		// for (uint64_t i = 0 ; i < 10055 && inf.length() > n ; n++, i++)
 		{
 			uint64_t y = 0;
@@ -252,7 +256,8 @@ void air::collect(ifstream& in_file, string filename)
 				y += inf.at(n);
 				n++;
 			}
-			answers.push_back(y - min_size);
+			// cout << (y - min_size) << " " << flush;
+			answers.push_back(y - (min_size));
 		}
 		range_size = UINT64_MAX - min_size;
 
