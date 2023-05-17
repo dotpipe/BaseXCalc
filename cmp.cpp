@@ -41,7 +41,7 @@ class air
 				powr *= range_size;
 			}
 			// cout << " " << range_size << flush;
-    		total = total + (powr * ((uint8_t)(answers.front())%(range_size + 1)));
+    		total = total + (powr * ((uint8_t)(answers.front() - min_size)));
 			answers.erase(answers.begin());
 			if (answers.empty() || total > pow(2,53))
 			{
@@ -233,7 +233,7 @@ void air::returnBytes()
 
 void air::collect(ifstream& in_file, string filename)
 {
-	uint32_t bytes = 4;
+	uint32_t bytes = 8;
 	stringstream no;
 	no << in_file.rdbuf();
 	string inf = no.str();
@@ -242,9 +242,8 @@ void air::collect(ifstream& in_file, string filename)
 	// x->range_size = x->max_size;
 	for (uint32_t n = 0; n < inf.length(); n++)
 	{
-		max_size = 2;
-		min_size = 0xA;
-		for (uint64_t i = 0 ; i < 1255 && inf.length() > n ; n++, i++)
+		min_size = 0xDDDDDDDDDDDDDDDE;
+		// for (uint64_t i = 0 ; i < 10055 && inf.length() > n ; n++, i++)
 		{
 			uint64_t y = 0;
 			while (n%bytes < bytes - 1 && inf.length() > n)
@@ -253,11 +252,9 @@ void air::collect(ifstream& in_file, string filename)
 				y += inf.at(n);
 				n++;
 			}
-			if (y >= max_size)
-				max_size = y;
 			answers.push_back(y - min_size);
 		}
-		range_size = max_size%min_size;
+		range_size = UINT64_MAX - min_size;
 
 		recIdle();
 		total = 0;
