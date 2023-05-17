@@ -1,4 +1,3 @@
-//
 #include <fstream>
 #include <iostream>
 #include <vector>
@@ -16,7 +15,7 @@ class air
 
 	public:
 	unsigned long int range_size = 256;
-	uint64_t min_size = 256;
+	int64_t min_size = 256;
 	uint64_t max_size = 2;
 	int MAX_ALL = 0;
 	int MAX_Q = MAX_ALL;
@@ -36,23 +35,23 @@ class air
 	bool recollect(ifstream& in);
 	inline void recIdle() {
 		unsigned long long int powr = 1;
-		for (int i = 0 ; 0 < answers.size() ; i++) {
+		for (int i = 0 ; i < answers.size() ; i++) {
 			powr = 1;
-			// for (int u = 0 ; u < i ; u++) {
-			// 	powr *= range_size;
-			// }
+			for (int u = 0 ; u < i ; u++) {
+				powr *= range_size;
+			}
 			// cout << " " << range_size << flush;
-    		total = total + (powr * ((uint8_t)(answers.front())));
+    		total = total + (powr * ((uint64_t)(answers.front())));
 			answers.erase(answers.begin());
-			//if (answers.empty() || total > pow(2,53))
+			if (answers.empty() || total > pow(2,53))
 			{
-				i = 0;
+				// i = 0;
 				returnBytes();
-				total = 0;
+				// total = 0;
 			}
 		}
-		if (total > 0)
-			returnBytes();
+//		if (total > 0)
+//			returnBytes();
 // std::cout << "Largess: " << total << endl;
 		return;
 	}
@@ -246,10 +245,10 @@ void air::collect(ifstream& in_file, string filename)
 	// x->range_size = x->max_size;
 	for (uint32_t n = 0; n < inf.length(); n++)
 	{
-		min_size = 0xDDDDDDDDDDDDDDD;
-		// for (uint64_t i = 0 ; i < 10055 && inf.length() > n ; n++, i++)
+		min_size = 0xFFFFFFFFFFFF0000;
+		for (uint64_t i = 0 ; i < 10055 && inf.length() > n ; n++, i++)
 		{
-			uint64_t y = 0;
+			int64_t y = 0;
 			while (n%bytes < bytes - 1 && inf.length() > n)
 			{
 				y <<= 8;
@@ -257,11 +256,12 @@ void air::collect(ifstream& in_file, string filename)
 				n++;
 			}
 			// cout << (y - min_size) << " " << flush;
-			answers.push_back(y - (min_size));
+			answers.push_back(abs(y - min_size));
 		}
 		range_size = UINT64_MAX - min_size;
 
 		recIdle();
+		answers.clear();
 		total = 0;
 		// std::cout << "\rOutput Total: " << output_total << "/" << (inf.length() - n) << flush;
 	}
